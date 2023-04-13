@@ -1,9 +1,9 @@
 const core = require('@actions/core');
-const github = require('@actions/github');
+import * as github from '@actions/github'
 
 try {
   // `pr-title` input defined in action metadata file
-  const prTitle = core.getInput('pr-title');
+  const prTitle = getPRTitle();
   console.log(`Hello ${prTitle}!`);
   const time = (new Date()).toTimeString();
   core.setOutput("time", time);
@@ -12,4 +12,22 @@ try {
   console.log(`The event payload: ${payload}`);
 } catch (error) {
   core.setFailed(error.message);
+}
+
+function getPRTitle() {
+  const pullRequest = github.context.payload.pull_request
+  if (!pullRequest) {
+    core.setFailed('Action not run in pull_request context.')
+    return ''
+  }
+
+  const prTitle = pullRequest.title
+
+  if (!prTitle) {
+    core.setFailed('Action couldnt find the title on PR')
+    return ''
+  }
+
+  core.debug(`get pr title : ${prTitle}`)
+  return prTitle
 }
