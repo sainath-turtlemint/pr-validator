@@ -1,0 +1,13 @@
+name: 'Jira Title Validator'
+description: 'PR title should have a valid Jira Id'
+inputs:
+  pr-title:  # id of input
+    description: 'Pr title'
+    required: true
+    default: 'random'
+outputs:
+  time: # id of output
+    description: 'The time we called this action'
+runs:
+  using: 'node16'
+  main: 'index.js'
