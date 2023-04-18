@@ -9843,8 +9843,8 @@ try {
   const time = (new Date()).toTimeString();
   core.setOutput("time", time);
   // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(_actions_github__WEBPACK_IMPORTED_MODULE_0__.context.payload, undefined, 2)
-  console.log(`The event payload: ${payload}`);
+  const payload = JSON.stringify(_actions_github__WEBPACK_IMPORTED_MODULE_0__.context)
+  console.log(`The complete event payload: ${payload}`);
 } catch (error) {
   core.setFailed(error.message);
 }
