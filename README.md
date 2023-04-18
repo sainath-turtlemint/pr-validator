@@ -19,3 +19,11 @@ The time we greeted you.
 ```yaml
 uses: actions/pr-validator@v1.1
 ```
+
+
+1. ncc build index.js --license licenses.txt
+2. git add .
+3. git commit -m "Use vercel/ncc"
+4. git tag -a -m "My first action release" v1.1
+5. git push --follow-tags
+
