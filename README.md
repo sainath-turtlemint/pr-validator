@@ -18,6 +18,4 @@ The time we greeted you.
 
 ```yaml
 uses: actions/pr-validator@v1.1
-with:
-  pr-title: 'Some valid PR title'
 ```
