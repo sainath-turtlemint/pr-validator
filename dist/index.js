@@ -9612,6 +9612,97 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 4859:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core_1 = __importDefault(__nccwpck_require__(2258));
+const github_1 = __importDefault(__nccwpck_require__(2003));
+const LABELS_SUCCESS_MESSAGE = ":rocket: Your PR has all required labels :rocket:";
+const JIRA_SUCCESS_MESSAGE = ":rocket: Your PR has a Jira Number or NOJIRA :rocket:";
+function getInputArray(name) {
+    const rawInput = core_1.default.getInput(name);
+    return rawInput !== "" ? rawInput.split(",") : [];
+}
+class PrChecker {
+    constructor(prNumber, labels, requiredLabels, ghToken, jiraRegex) {
+        this.prNumber = prNumber;
+        this.labels = labels;
+        this.requiredLabels = requiredLabels;
+        this.jiraRegExp = new RegExp(jiraRegex);
+        this.octokit = github_1.default.getOctokit(ghToken);
+    }
+    async run() {
+        this.checkLabels();
+        this.checkTitle();
+    }
+    /**
+     * Check if the PR title contains JIRA issue
+     */
+    async checkTitle() {
+        if (!this.jiraRegExp.test(github_1.default.context.payload.pull_request.title)) {
+            const errorMessage = `:eyes: Looks like your PR does not have a Jira number or NOJIRA on the title :rocket:`;
+            if (!(await this.isLastComment(errorMessage))) {
+                this.createComment(errorMessage);
+            }
+            core_1.default.setFailed("Please add Jira number or NOJIRA on the PR Title");
+        }
+        else if (!(await this.isLastComment(JIRA_SUCCESS_MESSAGE))) {
+            this.createComment(JIRA_SUCCESS_MESSAGE);
+        }
+    }
+    /**
+     * Check if the PR has all required labels and notify the user
+     */
+    async checkLabels() {
+        if (!this.requiredLabels.some((requiredLabel) => this.labels.find((l) => l.name === requiredLabel))) {
+            const errorMessage = `:eyes: Looks like your PR does not have any required label assigned to it. Please :pray: assign one of the following: ${this.requiredLabels.join(", ")} :rocket:`;
+            if (!(await this.isLastComment(errorMessage))) {
+                this.createComment(errorMessage);
+            }
+            core_1.default.setFailed(`Please select one of the required labels for this PR: ${this.requiredLabels}`);
+        }
+        else if (!(await this.isLastComment(LABELS_SUCCESS_MESSAGE))) {
+            this.createComment(LABELS_SUCCESS_MESSAGE);
+        }
+    }
+    /**
+     * Create Github comment
+     * @param body The message to post
+     */
+    createComment(body) {
+        this.octokit.rest.issues.createComment({
+            ...github_1.default.context.repo,
+            issue_number: this.prNumber,
+            body,
+        });
+    }
+    /**
+     * Check if the last comment has the given message already exists
+     * @param message The message to check for
+     * @returns Promise<boolean>
+     */
+    async isLastComment(message) {
+        const comments = await this.octokit.rest.issues.listComments({
+            ...github_1.default.context.repo,
+            issue_number: this.prNumber,
+        });
+        if (comments.data.length === 0) {
+            return false;
+        }
+        return comments.data[comments.data.length - 1].body === message;
+    }
+}
+new PrChecker(github_1.default.context.payload.pull_request.number, github_1.default.context.payload.pull_request.labels, getInputArray("required_labels"), core_1.default.getInput("gh_token"), core_1.default.getInput("jira_title_regex")).run();
+
+
+/***/ }),
+
 /***/ 9190:
 /***/ ((module) => {
 
@@ -9781,94 +9872,17 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__nccwpck_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__nccwpck_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
-(() => {
-"use strict";
-__nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2003);
-/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_0__);
-const core = __nccwpck_require__(2258);
-
-
-try {
-  // `pr-title` input defined in action metadata file
-  const prTitle = getPRTitle();
-  console.log(`Hello ${prTitle}!`);
-  const time = (new Date()).toTimeString();
-  core.setOutput("time", time);
-  // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(_actions_github__WEBPACK_IMPORTED_MODULE_0__.context)
-  console.log(`The complete event payload: ${payload}`);
-} catch (error) {
-  core.setFailed(error.message);
-}
-
-function getPRTitle() {
-  const pullRequest = _actions_github__WEBPACK_IMPORTED_MODULE_0__.context.payload.pull_request
-  if (!pullRequest) {
-    core.setFailed('Action not run in pull_request context.')
-    return ''
-  }
-
-  const prTitle = pullRequest.title
-
-  if (!prTitle) {
-    core.setFailed('Action couldnt find the title on PR')
-    return ''
-  }
-
-  core.debug(`get pr title : ${prTitle}`)
-  return prTitle
-}
-
-})();
-
-module.exports = __webpack_exports__;
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(4859);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;
