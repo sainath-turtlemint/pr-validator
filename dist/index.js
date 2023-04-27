@@ -9617,16 +9617,36 @@ function wrappy (fn, cb) {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__nccwpck_require__(2258));
-const github_1 = __importDefault(__nccwpck_require__(2003));
+const core = __importStar(__nccwpck_require__(2258));
+const github = __importStar(__nccwpck_require__(2003));
 const LABELS_SUCCESS_MESSAGE = ":rocket: Your PR has all required labels :rocket:";
 const JIRA_SUCCESS_MESSAGE = ":rocket: Your PR has a Jira Number or NOJIRA :rocket:";
 function getInputArray(name) {
-    const rawInput = core_1.default.getInput(name);
+    const rawInput = core.getInput(name);
     return rawInput !== "" ? rawInput.split(",") : [];
 }
 class PrChecker {
@@ -9635,7 +9655,7 @@ class PrChecker {
         this.labels = labels;
         this.requiredLabels = requiredLabels;
         this.jiraRegExp = new RegExp(jiraRegex);
-        this.octokit = github_1.default.getOctokit(ghToken);
+        this.octokit = github.getOctokit(ghToken);
     }
     async run() {
         this.checkLabels();
@@ -9645,12 +9665,12 @@ class PrChecker {
      * Check if the PR title contains JIRA issue
      */
     async checkTitle() {
-        if (!this.jiraRegExp.test(github_1.default.context.payload.pull_request.title)) {
+        if (!this.jiraRegExp.test(github.context.payload.pull_request.title)) {
             const errorMessage = `:eyes: Looks like your PR does not have a Jira number or NOJIRA on the title :rocket:`;
             if (!(await this.isLastComment(errorMessage))) {
                 this.createComment(errorMessage);
             }
-            core_1.default.setFailed("Please add Jira number or NOJIRA on the PR Title");
+            core.setFailed("Please add Jira number or NOJIRA on the PR Title");
         }
         else if (!(await this.isLastComment(JIRA_SUCCESS_MESSAGE))) {
             this.createComment(JIRA_SUCCESS_MESSAGE);
@@ -9665,7 +9685,7 @@ class PrChecker {
             if (!(await this.isLastComment(errorMessage))) {
                 this.createComment(errorMessage);
             }
-            core_1.default.setFailed(`Please select one of the required labels for this PR: ${this.requiredLabels}`);
+            core.setFailed(`Please select one of the required labels for this PR: ${this.requiredLabels}`);
         }
         else if (!(await this.isLastComment(LABELS_SUCCESS_MESSAGE))) {
             this.createComment(LABELS_SUCCESS_MESSAGE);
@@ -9677,7 +9697,7 @@ class PrChecker {
      */
     createComment(body) {
         this.octokit.rest.issues.createComment({
-            ...github_1.default.context.repo,
+            ...github.context.repo,
             issue_number: this.prNumber,
             body,
         });
@@ -9689,7 +9709,7 @@ class PrChecker {
      */
     async isLastComment(message) {
         const comments = await this.octokit.rest.issues.listComments({
-            ...github_1.default.context.repo,
+            ...github.context.repo,
             issue_number: this.prNumber,
         });
         if (comments.data.length === 0) {
@@ -9698,7 +9718,7 @@ class PrChecker {
         return comments.data[comments.data.length - 1].body === message;
     }
 }
-new PrChecker(github_1.default.context.payload.pull_request.number, github_1.default.context.payload.pull_request.labels, getInputArray("required_labels"), core_1.default.getInput("gh_token"), core_1.default.getInput("jira_title_regex")).run();
+new PrChecker(github.context.payload.pull_request.number, github.context.payload.pull_request.labels, getInputArray("required_labels"), core.getInput("gh_token"), core.getInput("jira_title_regex")).run();
 
 
 /***/ }),
